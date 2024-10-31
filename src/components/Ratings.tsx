@@ -1,5 +1,4 @@
 import { useRating } from "../hooks/useRating";
-import ReviewCard from "./ReviewCard";
 import Reviews from "./Reviews";
 
 export default function Ratings({ productId }: { productId: string }) {

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useProduct } from "../../hooks/useProducts";
 import Loading from "../Loading";
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { Star, Loader } from "lucide-react"; // Import the Loader icon
 import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { firestore } from "../../utils/firebase";
 import ThankYouPage from "../ThankyouPage";
@@ -21,7 +21,7 @@ export default function ProductReviewPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
+    setSubmitting(true); // Set submitting to true
     try {
       const analysis = await analyzeComment(comment);
 
@@ -37,6 +37,8 @@ export default function ProductReviewPage() {
       console.log("Review submitted successfully!");
     } catch (error) {
       console.error("Error submitting review:", error);
+    } finally {
+      setSubmitting(false); // Reset submitting state after try-catch
     }
   };
 
@@ -44,12 +46,26 @@ export default function ProductReviewPage() {
 
   return (
     <main className="p-10">
-      <h1 className="text-2xl font-bold">{product.productName}</h1>
-      <img src={product.imageUrl} alt={product.productName} className="my-4" />
-      <p className="text-gray-200">{product.description}</p>
+      {/* Full-width card with background image */}
+      <div
+        className="relative w-full h-80 rounded-lg overflow-hidden mb-10" // Full width and fixed height
+        style={{
+          backgroundImage: `url(${product.imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent flex items-center p-6">
+          <div className="text-white">
+            <h1 className="text-3xl font-bold mb-2">{product.productName}</h1>
+            <p className="text-lg">{product.description}</p>
+          </div>
+        </div>
+      </div>
 
-      <section className="mt-10">
-        <h2 className="text-xl font-semibold">Leave a Review</h2>
+      <section className="mt-10 p-6 border rounded-lg shadow-md border-cyan-800">
+        <h2 className="text-xl font-semibold mb-4">Leave a Review</h2>
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="flex items-center mb-4">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -58,11 +74,11 @@ export default function ProductReviewPage() {
                 onClick={() => setRating(star)}
                 className={`cursor-pointer ${
                   rating >= star ? "text-yellow-400" : "text-gray-400"
-                }`}
+                } hover:text-yellow-400 transition duration-200`}
                 size={24}
               />
             ))}
-            <span className="ml-2 text-gray-200">
+            <span className="ml-2 text-gray-600">
               {rating} Star{rating !== 1 ? "s" : ""}
             </span>
           </div>
@@ -70,15 +86,21 @@ export default function ProductReviewPage() {
             placeholder="Write your review here..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="p-2 w-full h-32 rounded-md text-black"
+            className="p-2 w-full h-32 rounded-md border border-gray-300 focus:outline-none text-black focus:ring-2 focus:ring-blue-600"
             required
           />
           <button
             type="submit"
-            className="mt-4 p-2 bg-blue-600 rounded-md"
-            disabled={submitting}
+            className="mt-4 p-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition duration-200"
+            disabled={submitting} // Disable button while submitting
           >
-            Submit Review
+            {submitting ? (
+              <div className="flex items-center">
+                <Loader className="animate-spin mr-2" size={16} /> Submitting...
+              </div>
+            ) : (
+              "Submit Review"
+            )}
           </button>
         </form>
       </section>
